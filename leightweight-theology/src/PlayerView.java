@@ -17,9 +17,6 @@ public class PlayerView extends JFrame {
 	public PlayerView(){
 		//Get the UI set up
 		initUI();
-		
-		//Show the view window
-		setVisible(true);
 	}
 
 	/**Add an ActionListener to the stop component.
@@ -56,21 +53,24 @@ public class PlayerView extends JFrame {
 		//Set frame default behaviors and layout
 		setLayout(new FlowLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(600, 200);
 		
 		//Initialize UI elements
 		filename = new JTextField(20);
 		openFile = new JButton("Browse...");
 		stop = new JButton("Stop");
 		start = new JButton("Play");
+		viewPanel = new JPanel(new GridBagLayout());
 		
 		
 		//Place UI elements
 		// This is complex because of the gridbaglayout, so it's in
 		// it's own method.
 		arrangeUIelements();
-		
+		//Add component panel
 		add(viewPanel);
+		//Show the view window
+		setVisible(true);
+		pack();
 	}
 
 	/**Populates the view.
@@ -81,10 +81,9 @@ public class PlayerView extends JFrame {
 	private void arrangeUIelements() {
 		//Initialize display area.
 		GridBagConstraints gbc = new GridBagConstraints();
-		viewPanel = new JPanel(new GridBagLayout());
 		
 		//Add filename field
-		gbc.anchor = GridBagConstraints.EAST;
+		gbc.anchor = GridBagConstraints.WEST;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.weightx = 0.8;
@@ -104,7 +103,7 @@ public class PlayerView extends JFrame {
 		
 		//Add Stop button
 		gbc.gridx = 1;
-		gbc.anchor = GridBagConstraints.WEST;
+		gbc.anchor = GridBagConstraints.EAST;
 		viewPanel.add(stop, gbc);
 	}
 }
