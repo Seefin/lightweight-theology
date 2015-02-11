@@ -1,5 +1,3 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -8,9 +6,11 @@ import java.util.concurrent.Executors;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class PlayerModel implements ActionListener{
+public class PlayerModel {
 	//Data
 	private File audioFile;
 	private AudioFormat format;
@@ -20,21 +20,31 @@ public class PlayerModel implements ActionListener{
 	private ExecutorService es = Executors.newCachedThreadPool();
 
 	//Calculation
+	/**Creates a new Model.
+	 * The created model has all of the audio system set up and ready to go, and
+	 * just needs to be supplied with an audio file so it can play it.
+	 * @param filename The filename of the audio file to play.
+	 */
 	public PlayerModel(String filename){
 		try {
 			audioFile = new File(filename);
-			if(!audioFile.exists()){System.out.println("Not exist!");throw new IOException();}
-			stream = AudioSystem.getAudioInputStream(audioFile);
-			format = stream.getFormat();
-			dataline = AudioSystem.getSourceDataLine(format);
+			setupAudioSystem();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}
 
+	/**Play the selected file.
+	 * Plays the selected file. It does this by wrapping all the 'play stream' logic in
+	 * an anonymous instance of Runnable, and uses java's concurrency libraries to get it running.
+	 * 
+	 * As the stop boolean is volatile, it will be monitored even in a multiple core environment. 
+	 */
 	public void playFile(){
+		//Set up for play back
 		stop = false;
 		byte tempBuffer[] = new byte[10000];
+		//Wrap play logic in a runnable
 		Runnable playTask = new Runnable(){
 			public void run(){
 				try {
@@ -55,25 +65,46 @@ public class PlayerModel implements ActionListener{
 				}
 			}
 		};
+		//Run the runnable somewhere asynchronously.
 		es.execute(playTask);
 	}
 
+	/**Stops playback of the current file.
+	 * 
+	 */
 	public void stopFile(){
 		stop = true;
 	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equalsIgnoreCase("browse")){
-			System.out.println("Browsing not implemented yet!");
-		} else if(e.getActionCommand().equalsIgnoreCase("play")){
-			System.out.println("Play!");
-			playFile();
-		} else if(e.getActionCommand().equalsIgnoreCase("stop")){
-			System.out.println("Stop!");
+
+	/**Set up the system for playing audio.
+	 * We initialize the stream, grab the format of the file (should be 16-bit signed Low-endian PCM wav), and
+	 * finally grab a line so we can play the file itself.
+	 * @throws IOException	If the file is non-existent
+	 * @throws UnsupportedAudioFileException If the format is not supported on this hardware
+	 * @throws LineUnavailableException If there are no source lines for the program to use.
+	 */
+	private void setupAudioSystem() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
+		if(!audioFile.exists()){System.out.println("Not exist!");throw new IOException();}
+		stream = AudioSystem.getAudioInputStream(audioFile);
+		format = stream.getFormat();
+		dataline = AudioSystem.getSourceDataLine(format);
+	}
+
+	/**Set the file to a new thing!
+	 * Allows dynamic changing of the file to be played by the user.
+	 * @param args File to change it to.
+	 */
+	public void setFilename(File file) {
+		if(file != null){
 			stopFile();
+			audioFile = file;
+			try {
+				setupAudioSystem();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} else {
-			System.out.println(e.getActionCommand() + " not implemented");
+			return;
 		}
 	}
 
@@ -87,6 +118,4 @@ public class PlayerModel implements ActionListener{
 		}
 		pm.stopFile();
 	}
-
-
 }
