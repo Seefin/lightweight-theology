@@ -26,10 +26,8 @@ public class PlayerController implements ActionListener{
 				err.printStackTrace();
 			}
 		} else if(e.getActionCommand().equalsIgnoreCase("play")){
-			System.out.println("Play!");
 			model.playFile();
 		} else if(e.getActionCommand().equalsIgnoreCase("stop")){
-			System.out.println("Stop!");
 			model.stopFile();
 		} else {
 			System.out.println(e.getActionCommand() + " not implemented");
