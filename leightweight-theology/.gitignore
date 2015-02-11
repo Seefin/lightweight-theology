@@ -2,3 +2,4 @@ bin/
 .classpath
 *.class
 *.swp
+/test.wav
