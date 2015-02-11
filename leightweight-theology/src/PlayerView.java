@@ -24,7 +24,7 @@ public class PlayerView extends JFrame {
 	private static final long serialVersionUID = 1L;
 	//UI elements
 	private JLabel filename;
-	private JButton openFile,stop,start;
+	private JButton openFile,start,stop;
 	private JPanel viewPanel;
 	private String filenameString = "test.wav";
 
@@ -35,15 +35,6 @@ public class PlayerView extends JFrame {
 	public PlayerView(){
 		//Get the UI set up
 		initUI();
-	}
-
-	/**Add an ActionListener to the stop component.
-	 * Adds to the actionListeners of the stop button.
-	 * @param listener The component to set as the ActionListener
-	 */
-	public void addStopListener(ActionListener listener){
-		stop.setActionCommand("stop");
-		stop.addActionListener(listener);
 	}
 
 	/**Add an ActionListener to the start component.
@@ -62,6 +53,15 @@ public class PlayerView extends JFrame {
 	public void addBrowseListener(ActionListener listener){
 		openFile.setActionCommand("browse");
 		openFile.addActionListener(listener);
+	}
+	
+	/**Add an ActionListener to the stop component.
+	 * Adds to the actionListeners of the stop button.
+	 * @param listener The component to set as the ActionListener
+	 */
+	public void addStopListener(ActionListener listener){
+		stop.setActionCommand("stop");
+		stop.addActionListener(listener);
 	}
 
 	/**Choose a file to play.
@@ -91,6 +91,17 @@ public class PlayerView extends JFrame {
 		}
 	}
 
+	public void pauseFile(boolean paused){
+		if(paused){
+			start.setText("Play");
+			start.setActionCommand("play");
+		} else if(!paused){
+			start.setText("Pause");
+			start.setActionCommand("Pause");
+		} else {
+			System.out.println("THIS SHOULD NOT HAPPEN");
+		}
+	}
 	//------ Privates ------
 
 	/**Update the filename string.
@@ -99,8 +110,11 @@ public class PlayerView extends JFrame {
 	 * @param name The name of the currently playing file.
 	 */
 	private void updateFilenameString(String name) {
+		//Update Now Playing: label
 		filenameString = name;
 		filename.setText(FileLabelPrefix + filenameString);
+		//Update Window title
+		setTitle("Lightweight-Theology | " + filenameString);
 	}
 
 	/**Initialize the view.
@@ -111,12 +125,13 @@ public class PlayerView extends JFrame {
 		//Set frame default behaviors and layout
 		setLayout(new FlowLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setTitle("Lightweight-Theology | " + filenameString);
 
 		//Initialize UI elements
 		filename = new JLabel(FileLabelPrefix + filenameString );
 		openFile = new JButton("Browse...");
-		stop = new JButton("Pause");
 		start = new JButton("Play");
+		stop = new JButton("Stop");
 		viewPanel = new JPanel(new GridBagLayout());
 
 
