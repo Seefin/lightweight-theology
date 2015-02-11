@@ -24,6 +24,7 @@ public class PlayerView extends JFrame {
 	 * @param listener The component to set as the ActionListener
 	 */
 	public void addStopListener(ActionListener listener){
+		stop.setActionCommand("stop");
 		stop.addActionListener(listener);
 	}
 	
@@ -32,6 +33,7 @@ public class PlayerView extends JFrame {
 	 * @param listener The component to set as the ActionListener
 	 */
 	public void addPlayListener(ActionListener listener){
+		start.setActionCommand("play");
 		start.addActionListener(listener);
 	}
 	
@@ -40,6 +42,7 @@ public class PlayerView extends JFrame {
 	 * @param listener The component to set as the ActionListener
 	 */
 	public void addBrowseListener(ActionListener listener){
+		openFile.setActionCommand("browse");
 		openFile.addActionListener(listener);
 	}
 	
