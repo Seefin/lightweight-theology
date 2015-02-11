@@ -1,4 +1,6 @@
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,9 +16,11 @@ public class PlayerModel {
 	//Data
 	private File audioFile;
 	private AudioFormat format;
+	private BufferedInputStream bis;
 	private AudioInputStream stream;
 	private SourceDataLine dataline;
 	private volatile boolean stop = false; 
+	private volatile boolean reset = false;
 	private ExecutorService es = Executors.newCachedThreadPool();
 
 	//Calculation
@@ -43,16 +47,33 @@ public class PlayerModel {
 	public void playFile(){
 		//Set up for play back
 		stop = false;
+		reset = false;
 		byte tempBuffer[] = new byte[10000];
+		//Mark the beginning of the stream. Make it valid for the whole song.
+		bis.mark(Integer.MAX_VALUE);
 		//Wrap play logic in a runnable
 		Runnable playTask = new Runnable(){
 			public void run(){
 				try {
 					dataline.open(format);
 					dataline.start();
-					int cnt;
+					int cnt = 0;
 					while ((cnt = stream.read(tempBuffer, 0,
 							tempBuffer.length)) != -1 && !stop) {
+						if(reset){
+							System.out.println("Theoretical reset");
+							bis.reset();
+							cnt = 0;
+//							//Close off all things
+//							dataline.drain();
+//							dataline.close();
+//							//Open them again
+//							dataline.open(format);
+//							dataline.start();
+//							stream.reset();
+//							//Reset reset
+							reset = false;
+						}
 						if (cnt > 0) {
 							dataline.write(tempBuffer, 0, cnt);
 						}
@@ -72,9 +93,18 @@ public class PlayerModel {
 	/**Stops playback of the current file.
 	 * 
 	 */
-	public void stopFile(){
+	public void pauseFile(){
 		stop = true;
 	}
+
+	/**Resets the file to the beginning.
+	 * This method is effectively a 'rewind' method. It resets the stream to the beginning,
+	 * and then plays the stream.
+	 */
+	public void stopFile(){
+		reset = true;
+	}
+
 
 	/**Set up the system for playing audio.
 	 * We initialize the stream, grab the format of the file (should be 16-bit signed Low-endian PCM wav), and
@@ -85,7 +115,9 @@ public class PlayerModel {
 	 */
 	private void setupAudioSystem() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		if(!audioFile.exists()){System.out.println("Not exist!");throw new IOException();}
-		stream = AudioSystem.getAudioInputStream(audioFile);
+		//To enable marking and reseting the stream, we wrap in a buffered stream.
+		bis = new BufferedInputStream(new FileInputStream(audioFile));
+		stream = AudioSystem.getAudioInputStream(bis);
 		format = stream.getFormat();
 		dataline = AudioSystem.getSourceDataLine(format);
 	}

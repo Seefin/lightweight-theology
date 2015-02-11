@@ -27,8 +27,16 @@ public class PlayerController implements ActionListener{
 			}
 		} else if(e.getActionCommand().equalsIgnoreCase("play")){
 			model.playFile();
+			view.pauseFile(false);
 		} else if(e.getActionCommand().equalsIgnoreCase("stop")){
+			//Rewind the file
 			model.stopFile();
+			//Stop playback and reset play button state
+			model.pauseFile();
+			view.pauseFile(true);
+		} else if(e.getActionCommand().equalsIgnoreCase("pause")){
+			model.pauseFile();
+			view.pauseFile(true);
 		} else {
 			System.out.println(e.getActionCommand() + " not implemented");
 		}
