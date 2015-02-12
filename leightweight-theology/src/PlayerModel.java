@@ -111,6 +111,47 @@ public class PlayerModel {
 	}
 
 	/**
+	 * Set the file to a new thing. Allows dynamic changing of the file to be
+	 * played by the user.
+	 * 
+	 * @param args
+	 *            File to change it to.
+	 */
+	public void setFilename(File file) {
+		if (file != null) {
+			try {
+				stopFile();
+				audioFile = file;
+				setupAudioSystem();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			return;
+		}
+	}
+
+	/**
+	 * Returns the duration of this file in seconds. This method returns the
+	 * total duration of the current file in seconds; calling this method will
+	 * tell you how long the currently loaded file is.
+	 * 
+	 * @return duration The length of the currently load file in seconds.
+	 */
+	public float getFileDuration() {
+		if (!audioFile.exists()) {
+			return -1;
+		}
+		// Total file size in frames
+		long fileLengthInFrames = stream.getFrameLength();
+		// Frames per second.
+		float fileFramesPerSecond = format.getFrameRate();
+		// Total duration is Length / framerate
+		float duration = fileLengthInFrames / fileFramesPerSecond;
+		return duration;
+	}
+
+	/**
 	 * Set up the system for playing audio. We initialize the stream, grab the
 	 * format of the file (should be 16-bit signed Low-endian PCM wav), and
 	 * finally grab a line so we can play the file itself.
@@ -134,27 +175,6 @@ public class PlayerModel {
 		stream = AudioSystem.getAudioInputStream(bis);
 		format = stream.getFormat();
 		dataline = AudioSystem.getSourceDataLine(format);
-	}
-
-	/**
-	 * Set the file to a new thing! Allows dynamic changing of the file to be
-	 * played by the user.
-	 * 
-	 * @param args
-	 *            File to change it to.
-	 */
-	public void setFilename(File file) {
-		if (file != null) {
-			try {
-				stopFile();
-				audioFile = file;
-				setupAudioSystem();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			return;
-		}
 	}
 
 	public static void main(String args[]) {
