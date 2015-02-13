@@ -18,6 +18,21 @@ public class PlayerModel {
 
 	// Calculation
 	/**
+	 * Creates a new Model. The created model has all of the audio system set up
+	 * and ready to go, and just needs to be supplied with an audio file so it
+	 * can play it.
+	 * 
+	 * @param filename
+	 *            The filename of the audio file to play.
+	 */
+	public PlayerModel() {
+		try {
+			setupAudioSystem();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	/**
 	 * Play the selected file. Plays the selected file. It does this by wrapping
 	 * all the 'play stream' logic in an anonymous instance of Runnable, and
 	 * uses java's concurrency libraries to get it running.
@@ -32,7 +47,6 @@ public class PlayerModel {
 		// Set up for play back
 		stop = false;
 		reset = false;
-		setupAudioSystem();
 		byte tempBuffer[] = new byte[10000];
 		// Wrap play logic in a runnable
 		Runnable playTask = new Runnable() {
