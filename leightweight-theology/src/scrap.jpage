@@ -1,9 +1,0 @@
-try{
-	while(true){
-		return 3;
-	}
-} catch (Exception e){
-	e.printStackTrace();
-} finally {
-	System.out.println("finally");
-}
