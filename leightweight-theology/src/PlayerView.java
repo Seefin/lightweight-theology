@@ -73,9 +73,11 @@ public class PlayerView extends JFrame {
 	 */
 	public File browseFile() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		JFileChooser fc = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("WAV Files", "wav","WAV");
-		fc.addChoosableFileFilter(filter);
-		fc.setFileFilter(filter);
+		FileNameExtensionFilter wav = new FileNameExtensionFilter("WAV Files", "wav","WAV");
+		FileNameExtensionFilter mp3 = new FileNameExtensionFilter("MP3 Files","mp3","MP3");
+		fc.addChoosableFileFilter(wav);
+		fc.addChoosableFileFilter(mp3);
+		fc.setFileFilter(wav);
 		int retVal = fc.showOpenDialog(null);
 		if(retVal == JFileChooser.APPROVE_OPTION){
 			File f = fc.getSelectedFile();
@@ -91,7 +93,7 @@ public class PlayerView extends JFrame {
 		}
 	}
 
-	public void pauseFile(boolean paused){
+	public void isFilePaused(boolean paused){
 		if(paused){
 			start.setText("Play");
 			start.setActionCommand("play");
