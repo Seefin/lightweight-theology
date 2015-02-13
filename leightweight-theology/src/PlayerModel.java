@@ -1,16 +1,9 @@
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.*;
 
 public class PlayerModel {
 	// Data
@@ -25,34 +18,21 @@ public class PlayerModel {
 
 	// Calculation
 	/**
-	 * Creates a new Model. The created model has all of the audio system set up
-	 * and ready to go, and just needs to be supplied with an audio file so it
-	 * can play it.
-	 * 
-	 * @param filename
-	 *            The filename of the audio file to play.
-	 */
-	public PlayerModel(String filename) {
-		try {
-			audioFile = new File(filename);
-			setupAudioSystem();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * Play the selected file. Plays the selected file. It does this by wrapping
 	 * all the 'play stream' logic in an anonymous instance of Runnable, and
 	 * uses java's concurrency libraries to get it running.
 	 * 
 	 * As the stop boolean is volatile, it will be monitored even in a multiple
 	 * core environment.
+	 * @throws LineUnavailableException 
+	 * @throws UnsupportedAudioFileException 
+	 * @throws IOException 
 	 */
-	public void playFile() {
+	public void playFile() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		// Set up for play back
 		stop = false;
 		reset = false;
+		setupAudioSystem();
 		byte tempBuffer[] = new byte[10000];
 		// Wrap play logic in a runnable
 		Runnable playTask = new Runnable() {
@@ -103,7 +83,7 @@ public class PlayerModel {
 	 *             There was an IO related error in reading the file
 	 */
 	public void stopFile() throws IOException, UnsupportedAudioFileException,
-			LineUnavailableException {
+	LineUnavailableException {
 		// Signal to play back mechanism we want to not play back
 		reset = true;
 		// Reset back to the intial state
@@ -120,10 +100,9 @@ public class PlayerModel {
 	public void setFilename(File file) {
 		if (file != null) {
 			try {
-				stopFile();
 				audioFile = file;
-				setupAudioSystem();
 			} catch (Exception e) {
+				System.err.println("Error in setFileName");
 				e.printStackTrace();
 			}
 		} else {
@@ -153,8 +132,8 @@ public class PlayerModel {
 
 	/**
 	 * Set up the system for playing audio. We initialize the stream, grab the
-	 * format of the file (should be 16-bit signed Low-endian PCM wav), and
-	 * finally grab a line so we can play the file itself.
+	 * format of the file,decode mp3 first, and finally grab a line so we can
+	 * play the file itself.
 	 * 
 	 * @throws IOException
 	 *             If the file is non-existent
@@ -164,7 +143,7 @@ public class PlayerModel {
 	 *             If there are no source lines for the program to use.
 	 */
 	private void setupAudioSystem() throws IOException,
-			UnsupportedAudioFileException, LineUnavailableException {
+	UnsupportedAudioFileException, LineUnavailableException {
 		if (!audioFile.exists()) {
 			System.out.println("Not exist!");
 			throw new IOException();
@@ -173,13 +152,38 @@ public class PlayerModel {
 		// stream.
 		bis = new BufferedInputStream(new FileInputStream(audioFile));
 		stream = AudioSystem.getAudioInputStream(bis);
-		format = stream.getFormat();
+		System.out.println("MIME: "+Files.probeContentType(audioFile.toPath()));
+		if (true) {
+			AudioFormat originalFormat = stream.getFormat();
+			format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,// Encoding
+					originalFormat.getSampleRate(), // Sample Rate
+					16,// Sample size (bits)
+					originalFormat.getChannels(),// channels
+					originalFormat.getChannels() * 2, // frame size
+					originalFormat.getSampleRate(), // frame rate
+					false);// big endian
+			stream = AudioSystem.getAudioInputStream(format, stream);
+		}
+		//		} else {
+		//			format = stream.getFormat();
+		//		}
 		dataline = AudioSystem.getSourceDataLine(format);
 	}
 
 	public static void main(String args[]) {
-		PlayerModel pm = new PlayerModel("test.wav");
-		pm.playFile();
+		PlayerModel pm = new PlayerModel();
+		try {
+			pm.playFile();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (UnsupportedAudioFileException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (LineUnavailableException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			Thread.sleep(3000);
 			pm.stopFile();

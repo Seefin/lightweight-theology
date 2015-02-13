@@ -18,7 +18,7 @@ public class PlayerController implements ActionListener {
 	 * the user.
 	 */
 	public PlayerController() {
-		model = new PlayerModel("test.wav");
+		model = new PlayerModel();
 		view = new PlayerView();
 
 		view.addStopListener(this);
@@ -49,8 +49,7 @@ public class PlayerController implements ActionListener {
 			try {
 				File file = view.browseFile();
 				model.setFilename(file);
-				model.playFile();
-				view.pauseFile(false);
+				view.isFilePaused(true);
 			} catch (Exception err) {
 				err.printStackTrace();
 			}
@@ -61,8 +60,14 @@ public class PlayerController implements ActionListener {
 		 * play/pause button to act as a pause button.
 		 */
 		else if (event.getActionCommand().equalsIgnoreCase("play")) {
-			model.playFile();
-			view.pauseFile(false);
+			try {
+				model.playFile();
+			} catch (IOException | UnsupportedAudioFileException
+					| LineUnavailableException e) {
+				System.err.println("Cannot initalize audio system");
+				e.printStackTrace();
+			}
+			view.isFilePaused(false);
 		}
 		/*
 		 * Handle the stop button. When the user presses stop, we tell the model
@@ -74,7 +79,7 @@ public class PlayerController implements ActionListener {
 			try {
 				// Stop playback and reset play button state
 				model.pauseFile();
-				view.pauseFile(true);
+				view.isFilePaused(true);
 				// Rewind the file
 				model.stopFile();
 			} catch (IOException err) {
@@ -95,7 +100,7 @@ public class PlayerController implements ActionListener {
 		 */
 		else if (event.getActionCommand().equalsIgnoreCase("pause")) {
 			model.pauseFile();
-			view.pauseFile(true);
+			view.isFilePaused(true);
 		}
 		/*
 		 * Handle any other button. If we start receiving events we shouldn't,
