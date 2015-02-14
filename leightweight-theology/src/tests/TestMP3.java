@@ -1,3 +1,4 @@
+package tests;
 import javax.sound.sampled.*;
 import java.io.*;
 public class TestMP3 {
