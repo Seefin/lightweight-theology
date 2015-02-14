@@ -18,7 +18,8 @@ will be desired as well.
 1. Playlist support. I want to be able to read and write playlists of music,
 the format of which is still to be determined.
 
-Playlist support is provided by the [Lizzy](http://lizzy.sourceforge.net/) library.
-The Library supports many different playlist types, but to simplify things, I prefer
-M3U in lightweight-theology.
+    Playlist support is provided by the [Lizzy](http://lizzy.sourceforge.net/) library.
+    The Library supports many different playlist types, but to simplify things, I prefer
+    M3U in lightweight-theology.
+
 1. Support for album, artist tags etc.
