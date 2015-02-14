@@ -1,4 +1,4 @@
-package player;
+package m3u;
 
 import java.io.File;
 import java.io.IOException;
