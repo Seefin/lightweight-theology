@@ -1,10 +1,13 @@
 package player;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.sound.sampled.*;
+
+import m3u.Playlist;
 
 public class PlayerModel {
 	// Data
@@ -15,6 +18,7 @@ public class PlayerModel {
 	private volatile boolean stop = false;
 	private volatile boolean reset = false;
 	private ExecutorService es = Executors.newCachedThreadPool();
+	private Playlist playlist;
 
 	// Calculation
 	/**
@@ -33,6 +37,7 @@ public class PlayerModel {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * Play the selected file. Plays the selected file. It does this by wrapping
 	 * all the 'play stream' logic in an anonymous instance of Runnable, and
@@ -40,11 +45,13 @@ public class PlayerModel {
 	 *
 	 * As the stop boolean is volatile, it will be monitored even in a multiple
 	 * core environment.
+	 * 
 	 * @throws LineUnavailableException
 	 * @throws UnsupportedAudioFileException
 	 * @throws IOException
 	 */
-	public void playFile() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
+	public void playFile() throws IOException, UnsupportedAudioFileException,
+			LineUnavailableException {
 		// Set up for play back
 		stop = false;
 		reset = false;
@@ -98,7 +105,7 @@ public class PlayerModel {
 	 *             There was an IO related error in reading the file
 	 */
 	public void stopFile() throws IOException, UnsupportedAudioFileException,
-	LineUnavailableException {
+			LineUnavailableException {
 		// Signal to play back mechanism we want to not play back
 		reset = true;
 		// Reset back to the intial state
@@ -158,13 +165,13 @@ public class PlayerModel {
 	 *             If there are no source lines for the program to use.
 	 */
 	private void setupAudioSystem() throws IOException,
-	UnsupportedAudioFileException, LineUnavailableException {
+			UnsupportedAudioFileException, LineUnavailableException {
 		if (!audioFile.exists()) {
 			System.out.println("Not exist!");
 			throw new IOException();
 		}
 		stream = AudioSystem.getAudioInputStream(audioFile);
-		//Get file MIME type, to determine between WAV or MP3
+		// Get file MIME type, to determine between WAV or MP3
 		String MIMEType = Files.probeContentType(audioFile.toPath());
 		if (MIMEType.matches(".*mpeg[123]*$")) {
 			AudioFormat rawFormat = stream.getFormat();
@@ -177,8 +184,9 @@ public class PlayerModel {
 					false);// big endian?
 			stream = AudioSystem.getAudioInputStream(format, stream);
 		}
-		/*This is not a MP3. So, it must be a WAV file, with the restrictions on
-		 * File types in this application. WAV needs no decoding.
+		/*
+		 * This is not a MP3. So, it must be a WAV file, with the restrictions
+		 * on File types in this application. WAV needs no decoding.
 		 */
 		else {
 			format = stream.getFormat();
@@ -190,7 +198,8 @@ public class PlayerModel {
 		PlayerModel pm = new PlayerModel("test.wav");
 		try {
 			pm.playFile();
-		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e1) {
+		} catch (IOException | UnsupportedAudioFileException
+				| LineUnavailableException e1) {
 			e1.printStackTrace();
 		}
 		try {
@@ -198,6 +207,48 @@ public class PlayerModel {
 			pm.stopFile();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Return the name of the specified item in the playlist. If the playlist is
+	 * null, (because there is no playlist loaded) then we return the name of
+	 * the currently loaded song.
+	 * 
+	 * @param idx
+	 *            Index of the item.
+	 * @return The item's name.
+	 */
+	public String getPlaylistItem(int idx) {
+		if (playlist == null) {
+			return audioFile.getName();
+		} else {
+			return playlist.getSongAt(idx);
+		}
+	}
+
+	/**
+	 * Set the value of the playlist field. This is designed to accept a fully
+	 * populated playlist, and place it in the playlist field.
+	 * 
+	 * @param p
+	 *            The playlist to set as the current playlist.
+	 */
+	public void setPlaylist(Playlist p) {
+		playlist = p;
+	}
+
+	/**
+	 * Get the number of songs in the playlist. This is one if playlist is null,
+	 * and larger if it is not.
+	 * 
+	 * @return The number of songs in the playlist.
+	 */
+	public int getPlaylistSongCount() {
+		if (playlist == null) {
+			return 1;
+		} else {
+			return playlist.songCount();
 		}
 	}
 }

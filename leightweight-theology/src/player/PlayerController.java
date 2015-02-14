@@ -1,4 +1,5 @@
 package player;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -6,9 +7,17 @@ import java.io.IOException;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 
-public class PlayerController implements ActionListener {
-	//Model and View Components.
+import m3u.Playlist;
+
+public class PlayerController extends AbstractTableModel implements
+ActionListener, ListSelectionListener {
+	private static final long serialVersionUID = -7305209832418092647L;
+	// Model and View Components.
 	PlayerView view;
 	PlayerModel model;
 
@@ -25,10 +34,29 @@ public class PlayerController implements ActionListener {
 		view.addStopListener(this);
 		view.addPlayListener(this);
 		view.addBrowseListener(this);
+		view.setPlaylistDataModel(this);
+		view.addPlaylistListener(this);
 	}
 
+	//-----Listeners ----
+	
+	public void valueChanged(ListSelectionEvent e) {
+		int selectedSong = e.getLastIndex()+1;
+		System.out.println("Hello! Row: "+selectedSong);
+		try {
+			model.stopFile();
+			String name = model.getPlaylistItem(selectedSong);
+			model.setFilename(new File(name));
+			model.playFile();
+		} catch (IOException | UnsupportedAudioFileException
+				| LineUnavailableException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
 	/**
-	 * ActionListener. This method is effectivly the `event-driven' part of the
+	 * ActionListener. This method is effectively the `event-driven' part of the
 	 * program; when a user presses a button, the view notifies the controller
 	 * via this method, and then the controller does the required action.
 	 * 
@@ -49,8 +77,17 @@ public class PlayerController implements ActionListener {
 		if (event.getActionCommand().equalsIgnoreCase("browse")) {
 			try {
 				File file = view.browseFile();
-				model.setFilename(file);
-				view.isFilePaused(true);
+				if(file == null){
+					return;
+				}
+				if(file.getName().matches(".*m3u$")){
+					model.setPlaylist(new Playlist(file.getPath()));
+					view.isFilePaused(true);
+					model.setFilename(new File(model.getPlaylistItem(1)));
+				} else {
+					model.setFilename(file);
+					view.isFilePaused(true);
+				}
 			} catch (Exception err) {
 				err.printStackTrace();
 			}
@@ -113,8 +150,63 @@ public class PlayerController implements ActionListener {
 		}
 	}
 
+	/**
+	 * Return the number of records in this playlist. This method allows us to
+	 * specify the records in a playlist as rows in a {@link JTable}. Specifying
+	 * the controller as a subclass of {@link AbstractTableModel} gives us this
+	 * capability.
+	 * 
+	 * @return playlist.size(), effectively
+	 */
+	public int getRowCount() {
+		return model.getPlaylistSongCount();
+	}
+
+	/**
+	 * Get the number of columns in this playlist. This is two - we have an
+	 * index and a song name.
+	 * 
+	 * @return 2
+	 */
+	public int getColumnCount() {
+		return 2;
+	}
+
+	/**
+	 * Given a row and a column, what should be displayed? This is easy in the
+	 * case of column 1; we display the index of an item. Column 2 is the index
+	 * in the list, otherwise known as the rowIndex; so we use
+	 * playlist.get(rowIndex) here.
+	 * 
+	 * @return Some object representing the relevant data
+	 * 
+	 */
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		if (columnIndex == 0) {
+			return new Integer(rowIndex + 1);
+		} else if (columnIndex == 1) {
+			return model.getPlaylistItem(rowIndex);
+		} else {
+			return "wtf";
+		}
+	}
+
+	/**Returns the headers for each column in the table. 
+	 * 
+	 * @param col The column the header belongs to
+	 * @return A string for that header.
+	 */
+	public String getColumnName(int col){
+		if(col == 0){
+			return "";
+		} else if(col == 1){
+			return "Title";
+		} else {
+			return "" + col;
+		}
+	}
+
 	public static void main(String[] args) {
 		new PlayerController();
 	}
-
 }

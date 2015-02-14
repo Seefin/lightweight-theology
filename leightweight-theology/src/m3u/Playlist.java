@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
+
 /**
  * Represents a playlist of music. Provides storage for a playlist of files,
  * parsing m3u playlists, and what song is next in the list.
@@ -115,6 +116,18 @@ public class Playlist {
 	 */
 	public int getCurrentSong() {
 		return currentSong;
+	}
+
+	/**
+	 * Get the song at the specified index. This method is only useful for the
+	 * controller if the controller is an AbstractTableModel; otherwise it is
+	 * useless.
+	 * 
+	 * @param idx The index of the item.
+	 * @return The item
+	 */
+	public String getSongAt(int idx) {
+		return playlist.get(idx).getName();
 	}
 
 	/**
