@@ -9,7 +9,6 @@ public class PlayerModel {
 	// Data
 	private File audioFile;
 	private AudioFormat format;
-	private volatile BufferedInputStream bis;
 	private AudioInputStream stream;
 	private SourceDataLine dataline;
 	private volatile boolean stop = false;
@@ -25,8 +24,9 @@ public class PlayerModel {
 	 * @param filename
 	 *            The filename of the audio file to play.
 	 */
-	public PlayerModel() {
+	public PlayerModel(String filename) {
 		try {
+			audioFile = new File(filename);
 			setupAudioSystem();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -115,6 +115,7 @@ public class PlayerModel {
 		if (file != null) {
 			try {
 				audioFile = file;
+				setupAudioSystem();
 			} catch (Exception e) {
 				System.err.println("Error in setFileName");
 				e.printStackTrace();
@@ -162,44 +163,38 @@ public class PlayerModel {
 			System.out.println("Not exist!");
 			throw new IOException();
 		}
-		// To enable marking and reseting the stream, we wrap in a buffered
-		// stream.
-		bis = new BufferedInputStream(new FileInputStream(audioFile));
-		stream = AudioSystem.getAudioInputStream(bis);
-		System.out.println("MIME: "+Files.probeContentType(audioFile.toPath()));
-		if (true) {
-			AudioFormat originalFormat = stream.getFormat();
+		stream = AudioSystem.getAudioInputStream(audioFile);
+		//Get file MIME type, to determine between WAV or MP3
+		String MIMEType = Files.probeContentType(audioFile.toPath());
+		if (MIMEType.matches(".*mpeg[123]*$")) {
+			AudioFormat rawFormat = stream.getFormat();
 			format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,// Encoding
-					originalFormat.getSampleRate(), // Sample Rate
+					rawFormat.getSampleRate(), // Sample Rate
 					16,// Sample size (bits)
-					originalFormat.getChannels(),// channels
-					originalFormat.getChannels() * 2, // frame size
-					originalFormat.getSampleRate(), // frame rate
+					rawFormat.getChannels(),// channels
+					rawFormat.getChannels() * 2, // frame size
+					rawFormat.getSampleRate(), // frame rate
 					false);// big endian
 			stream = AudioSystem.getAudioInputStream(format, stream);
 		}
-		//		} else {
-		//			format = stream.getFormat();
-		//		}
+		/*This is not a MP3. So, it must be a WAV file, with the restrictions on 
+		 * File types in this application. WAV needs no decoding.
+		 */
+		else {
+			format = stream.getFormat();
+		}
 		dataline = AudioSystem.getSourceDataLine(format);
 	}
 
 	public static void main(String args[]) {
-		PlayerModel pm = new PlayerModel();
+		PlayerModel pm = new PlayerModel("test.wav");
 		try {
 			pm.playFile();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (UnsupportedAudioFileException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (LineUnavailableException e1) {
-			// TODO Auto-generated catch block
+		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e1) {
 			e1.printStackTrace();
 		}
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(10000);
 			pm.stopFile();
 		} catch (Exception e) {
 			e.printStackTrace();

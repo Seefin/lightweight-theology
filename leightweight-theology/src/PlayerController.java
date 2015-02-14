@@ -18,7 +18,7 @@ public class PlayerController implements ActionListener {
 	 * the user.
 	 */
 	public PlayerController() {
-		model = new PlayerModel();
+		model = new PlayerModel("test.wav");
 		view = new PlayerView();
 
 		view.addStopListener(this);
