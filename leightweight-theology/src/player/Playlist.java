@@ -2,13 +2,11 @@ package player;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-
-import javax.naming.OperationNotSupportedException;
 
 /**
  * Represents a playlist of music. Provides storage for a playlist of files,
@@ -35,10 +33,15 @@ public class Playlist {
 	 *             If the specified file is not a valid M3U file.
 	 */
 	public Playlist(String file) throws IllegalArgumentException {
+		// Initialize empty collections
 		playlist = new ArrayList<File>();
 		shuffled = false;
+		// Initialize the song count
 		currentSong = 1;
+		// Load in the playlist from file. If it's malformed, an Exception will
+		// occur.
 		loadM3U(file);
+		// Set up for shuffled playing.
 		shuffledList = new ArrayList<File>(playlist);
 		Collections.shuffle(shuffledList);
 		shuffleItr = shuffledList.iterator();
@@ -55,6 +58,7 @@ public class Playlist {
 	 * @return An Iterator over this playlist.
 	 */
 	public Iterator<File> getIterator() {
+		// Choose the right iterator
 		if (!shuffled)
 			return playlist.iterator();
 		return shuffleItr;
@@ -69,16 +73,22 @@ public class Playlist {
 	 *             If the file doesn't actually exist.
 	 */
 	public String nextFile() throws IOException {
+		// Sanity checking
 		if (currentSong < 1 || currentSong == Integer.MAX_VALUE) {
 			throw new IllegalStateException(
 					"Playlist counter is invalid. It should not be: "
 							+ currentSong);
 		}
+		// Initialize the file object
 		File f = null;
+		// Check if we are shuffled
 		if (!shuffled) {
+			// If we aren't shuffled, return the next song, index based.
 			f = playlist.get(currentSong - 1);
 			currentSong++;
 		} else {
+			// If we *are* shuffled, we need to grab the next song in the
+			// shuffled list.
 			f = shuffleItr.next();
 			currentSong++;
 		}
@@ -133,13 +143,80 @@ public class Playlist {
 	 * @return The number of songs in this playlist. Again, this is a 1-based
 	 *         answer.
 	 */
-	public int songCount(){
+	public int songCount() {
 		return playlist.size();
+	}
+
+	/**
+	 * Return the name of this playlist.
+	 * 
+	 * @return The name of this playlist as a string.
+	 */
+	public String getName() {
+		return listName;
+	}
+
+	/**
+	 * Restarts this playlist from the beginning of the list. Basically
+	 * initializes the values again.
+	 */
+	public void resetPlaylist() {
+		currentSong = 1;
+		shuffleItr = shuffledList.iterator();
 	}
 
 	// -----Privates-----
 
-	private boolean loadM3U(String list) {
-		return false;
+	/**
+	 * Calls the M3U parser and parses the file. This method extracts the
+	 * filename and sets
+	 * 
+	 * @param list
+	 */
+	private void loadM3U(String list) {
+		// Determine file name
+		listName = getListName(list);
+		// Parse M3U data
+		playlist = m3u.M3UParser.parse(list);
+	}
+
+	/**
+	 * Gets the name of this playlist, based on the file name. This is possibly
+	 * an inefficient way of stripping the extensions, but it works FOR THIS USE
+	 * CASE.
+	 * 
+	 * @param String
+	 *            The full path to the playlist specification file
+	 * @return The name of this playlist, assuming the name of the file matches
+	 *         the name of the list.
+	 */
+	private String getListName(String path) {
+		// Get path name, and grab the last bit.
+		Path p = Paths.get("/var/lib/mpd/.playlist/musicList.m3u");
+		String file = p.getFileName().toString();
+		// Process the name, and remove any extensions.
+		char[] charArray = file.toCharArray();
+		int mark = charArray.length - 1;
+		/*
+		 * Moving backwards through the array, find the earliest occurrence of a
+		 * '.' character. Anything *before* this is assumed to be the file name,
+		 * and everything after is an extension.
+		 */
+		for (int i = mark; i > 0; i--) {
+			if (charArray[i] == '.') {
+				mark = i;
+			}
+		}
+		/*
+		 * Turn our character array back into a string, stopping at the point
+		 * where we detected the first '.' character. This is easiest if we move
+		 * forwards through the array at this point.
+		 */
+		StringBuffer str = new StringBuffer();
+		for (int i = 0; i < mark; i++) {
+			str.append(charArray[i]);
+		}
+		// Return our 'sanitized' list name.
+		return str.toString();
 	}
 }
