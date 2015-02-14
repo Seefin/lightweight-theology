@@ -14,7 +14,7 @@ My final iteration should have:
 1. Some form of visualisation, so that it's not just a boring screen.
 However, the option of an unobtrusive music bar in the corner of a screen
 will be desired as well.
-`Currently we are a small window in the root of the window`
+`Currently we are a small window in the root pane of the window`
 1. Playlist support. I want to be able to read and write playlists of music,
 the format of which is still to be determined.
 1. Support for album, artist tags etc.
