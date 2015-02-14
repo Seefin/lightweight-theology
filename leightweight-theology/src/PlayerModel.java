@@ -117,7 +117,6 @@ public class PlayerModel {
 				audioFile = file;
 				setupAudioSystem();
 			} catch (Exception e) {
-				System.err.println("Error in setFileName");
 				e.printStackTrace();
 			}
 		} else {
