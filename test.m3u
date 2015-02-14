@@ -1,0 +1,10 @@
+#EXTM3U
+
+#EXTINF:245, U2 - Beautiful Day
+/home/findlaconn/git/musicPlayer/BeautifulDay.wav
+
+#EXTINF:253, U2 - Cedars Of Lebanon
+/home/findlaconn/git/musicPlayer/leightweight-theology/CedarsOfLebanon.wav
+
+#EXTINF:401, Nirvana - Endless Nameless (Bonus Track)
+/home/findlaconn/git/musicPlayer/leightweight-theology/test.mp3
