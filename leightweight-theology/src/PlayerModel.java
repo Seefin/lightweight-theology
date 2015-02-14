@@ -20,7 +20,7 @@ public class PlayerModel {
 	 * Creates a new Model. The created model has all of the audio system set up
 	 * and ready to go, and just needs to be supplied with an audio file so it
 	 * can play it.
-	 * 
+	 *
 	 * @param filename
 	 *            The filename of the audio file to play.
 	 */
@@ -36,12 +36,12 @@ public class PlayerModel {
 	 * Play the selected file. Plays the selected file. It does this by wrapping
 	 * all the 'play stream' logic in an anonymous instance of Runnable, and
 	 * uses java's concurrency libraries to get it running.
-	 * 
+	 *
 	 * As the stop boolean is volatile, it will be monitored even in a multiple
 	 * core environment.
-	 * @throws LineUnavailableException 
-	 * @throws UnsupportedAudioFileException 
-	 * @throws IOException 
+	 * @throws LineUnavailableException
+	 * @throws UnsupportedAudioFileException
+	 * @throws IOException
 	 */
 	public void playFile() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		// Set up for play back
@@ -79,7 +79,7 @@ public class PlayerModel {
 
 	/**
 	 * Stops playback of the current file.
-	 * 
+	 *
 	 */
 	public void pauseFile() {
 		stop = true;
@@ -88,7 +88,7 @@ public class PlayerModel {
 	/**
 	 * Resets the file to the beginning. This method is effectively a 'rewind'
 	 * method. It resets the stream to the beginning, and then plays the stream.
-	 * 
+	 *
 	 * @throws LineUnavailableException
 	 *             If we can't get an Audio Line
 	 * @throws UnsupportedAudioFileException
@@ -107,7 +107,7 @@ public class PlayerModel {
 	/**
 	 * Set the file to a new thing. Allows dynamic changing of the file to be
 	 * played by the user.
-	 * 
+	 *
 	 * @param args
 	 *            File to change it to.
 	 */
@@ -129,7 +129,7 @@ public class PlayerModel {
 	 * Returns the duration of this file in seconds. This method returns the
 	 * total duration of the current file in seconds; calling this method will
 	 * tell you how long the currently loaded file is.
-	 * 
+	 *
 	 * @return duration The length of the currently load file in seconds.
 	 */
 	public float getFileDuration() {
@@ -149,7 +149,7 @@ public class PlayerModel {
 	 * Set up the system for playing audio. We initialize the stream, grab the
 	 * format of the file,decode mp3 first, and finally grab a line so we can
 	 * play the file itself.
-	 * 
+	 *
 	 * @throws IOException
 	 *             If the file is non-existent
 	 * @throws UnsupportedAudioFileException
@@ -177,7 +177,7 @@ public class PlayerModel {
 					false);// big endian?
 			stream = AudioSystem.getAudioInputStream(format, stream);
 		}
-		/*This is not a MP3. So, it must be a WAV file, with the restrictions on 
+		/*This is not a MP3. So, it must be a WAV file, with the restrictions on
 		 * File types in this application. WAV needs no decoding.
 		 */
 		else {
