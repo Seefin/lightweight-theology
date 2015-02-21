@@ -19,6 +19,7 @@ public class PlayerModel {
 	private volatile boolean reset = false;
 	private ExecutorService es = Executors.newCachedThreadPool();
 	private Playlist playlist;
+	private PlayerListener listener;
 
 	// Calculation
 	/**
@@ -78,6 +79,7 @@ public class PlayerModel {
 				} finally {
 					dataline.drain();
 					dataline.close();
+					listener.playerPerfomed(e);
 				}
 			}
 		};
@@ -250,5 +252,9 @@ public class PlayerModel {
 		} else {
 			return playlist.songCount();
 		}
+	}
+
+	public void setPlayerListener(PlayerListener pl) {
+		listener = pl;
 	}
 }

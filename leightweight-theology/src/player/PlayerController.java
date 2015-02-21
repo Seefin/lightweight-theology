@@ -15,7 +15,7 @@ import javax.swing.table.AbstractTableModel;
 import m3u.Playlist;
 
 public class PlayerController extends AbstractTableModel implements
-ActionListener, ListSelectionListener {
+ActionListener, ListSelectionListener, PlayerListener {
 	private static final long serialVersionUID = -7305209832418092647L;
 	// Model and View Components.
 	PlayerView view;
@@ -36,13 +36,34 @@ ActionListener, ListSelectionListener {
 		view.addBrowseListener(this);
 		view.setPlaylistDataModel(this);
 		view.addPlaylistListener(this);
+		
+		model.addPlayerListener(this);
 	}
 
-	//-----Listeners ----
-	
+	// -----Listeners ----
+
+	public void playerPerfomed(PlayerEvent e) {
+		int songID = e.songIdx;
+		String eventType = e.Message;
+		if(eventType.equalsIgnoreCase("stop")){
+			try {
+				model.stopFile();
+				String name = model.getPlaylistItem(songID++);
+				if(!(name == null)){
+					model.setFilename(new File(name));
+					model.playFile();
+				}
+			} catch (IOException | UnsupportedAudioFileException
+					| LineUnavailableException e1) {
+				e1.printStackTrace();
+			} //Should be pointless
+
+		}
+	}
+
 	public void valueChanged(ListSelectionEvent e) {
-		int selectedSong = e.getLastIndex()+1;
-		System.out.println("Hello! Row: "+selectedSong);
+		int selectedSong = e.getLastIndex() + 1;
+		System.out.println("Hello! Row: " + selectedSong);
 		try {
 			model.stopFile();
 			String name = model.getPlaylistItem(selectedSong);
@@ -52,9 +73,9 @@ ActionListener, ListSelectionListener {
 				| LineUnavailableException e1) {
 			e1.printStackTrace();
 		}
-		
+
 	}
-	
+
 	/**
 	 * ActionListener. This method is effectively the `event-driven' part of the
 	 * program; when a user presses a button, the view notifies the controller
@@ -77,10 +98,10 @@ ActionListener, ListSelectionListener {
 		if (event.getActionCommand().equalsIgnoreCase("browse")) {
 			try {
 				File file = view.browseFile();
-				if(file == null){
+				if (file == null) {
 					return;
 				}
-				if(file.getName().matches(".*m3u$")){
+				if (file.getName().matches(".*m3u$")) {
 					model.setPlaylist(new Playlist(file.getPath()));
 					view.isFilePaused(true);
 					model.setFilename(new File(model.getPlaylistItem(1)));
@@ -191,15 +212,17 @@ ActionListener, ListSelectionListener {
 		}
 	}
 
-	/**Returns the headers for each column in the table. 
+	/**
+	 * Returns the headers for each column in the table.
 	 * 
-	 * @param col The column the header belongs to
+	 * @param col
+	 *            The column the header belongs to
 	 * @return A string for that header.
 	 */
-	public String getColumnName(int col){
-		if(col == 0){
+	public String getColumnName(int col) {
+		if (col == 0) {
 			return "";
-		} else if(col == 1){
+		} else if (col == 1) {
 			return "Title";
 		} else {
 			return "" + col;
