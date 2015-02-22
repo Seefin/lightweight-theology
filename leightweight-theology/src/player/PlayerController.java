@@ -43,8 +43,8 @@ ActionListener, ListSelectionListener, PlayerListener {
 	// -----Listeners ----
 
 	public void playerPerfomed(PlayerEvent e) {
-		int songID = e.songIdx;
-		String eventType = e.Message;
+		int songID = e.id();
+		String eventType = e.message();
 		if(eventType.equalsIgnoreCase("stop")){
 			try {
 				model.stopFile();

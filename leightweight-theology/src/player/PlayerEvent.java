@@ -1,33 +1,43 @@
 package player;
 
-import java.awt.Event;
-/**
- * The playerModel class uses these events to communicate with it's listeners.
- * 
- * @author findlaconn
- *
- */
-public class PlayerEvent extends Event{
+import java.util.EventObject;
+
+public class PlayerEvent extends EventObject {
+	private static final long serialVersionUID = -2477413425775169651L;
+	private PlayerEvent _event;
+	private String mess;
+	private int id;
 	
-	private static final long serialVersionUID = 1127200673285192932L;
-	public enum TYPES {STOPEVENT};
-	public final String Message;
-	public int songIdx;
-	
-	public PlayerEvent(Object target, int id, Object arg) {
-		super(target, id, arg);
-		Message = "Wrong Constructor!";
+	public PlayerEvent(Object source, PlayerEvent e){
+		super(source);
+		_event = e;
 	}
 	
-	public PlayerEvent(Object target, int id, Object arg, String message){
-		super(target,id,arg);
-		Message = message;
-		songIdx = -1;
+	public PlayerEvent(String m){
+		super(null);
+		mess = m;
+		id = -1;
 	}
 	
-	public PlayerEvent(Object target, int id, Object arg, String message, int songIdx){
-		super(target,id,arg);
-		Message = message;
-		this.songIdx = songIdx;
+	public PlayerEvent(String m, int idx){
+		super(null);
+		mess = m;
+		this.id = idx;
+	}
+	
+	public String toString(){
+		return mess;
+	}
+	
+	public PlayerEvent event(){
+		return _event;
+	}
+	
+	public String message(){
+		return mess;
+	}
+	
+	public int id(){
+		return id;
 	}
 }

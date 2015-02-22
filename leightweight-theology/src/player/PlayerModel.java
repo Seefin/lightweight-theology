@@ -1,11 +1,18 @@
 package player;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import m3u.Playlist;
 
@@ -19,7 +26,7 @@ public class PlayerModel {
 	private volatile boolean reset = false;
 	private ExecutorService es = Executors.newCachedThreadPool();
 	private Playlist playlist;
-	private PlayerListener listener;
+	private ArrayList<PlayerListener> _listeners;
 
 	// Calculation
 	/**
@@ -52,7 +59,7 @@ public class PlayerModel {
 	 * @throws IOException
 	 */
 	public void playFile() throws IOException, UnsupportedAudioFileException,
-			LineUnavailableException {
+	LineUnavailableException {
 		// Set up for play back
 		stop = false;
 		reset = false;
@@ -79,12 +86,18 @@ public class PlayerModel {
 				} finally {
 					dataline.drain();
 					dataline.close();
-					listener.playerPerfomed(e);
+					fireStopEvent();
 				}
 			}
 		};
 		// Run the runnable somewhere asynchronously.
 		es.execute(playTask);
+	}
+
+	protected void fireStopEvent() {
+		PlayerEvent e = new PlayerEvent(this, new PlayerEvent("stop", playlist.getCurrentSong()));
+		for(PlayerListener l : _listeners)
+			l.playerPerfomed(e);
 	}
 
 	/**
@@ -107,7 +120,7 @@ public class PlayerModel {
 	 *             There was an IO related error in reading the file
 	 */
 	public void stopFile() throws IOException, UnsupportedAudioFileException,
-			LineUnavailableException {
+	LineUnavailableException {
 		// Signal to play back mechanism we want to not play back
 		reset = true;
 		// Reset back to the intial state
@@ -167,7 +180,7 @@ public class PlayerModel {
 	 *             If there are no source lines for the program to use.
 	 */
 	private void setupAudioSystem() throws IOException,
-			UnsupportedAudioFileException, LineUnavailableException {
+	UnsupportedAudioFileException, LineUnavailableException {
 		if (!audioFile.exists()) {
 			System.out.println("Not exist!");
 			throw new IOException();
@@ -254,7 +267,11 @@ public class PlayerModel {
 		}
 	}
 
-	public void setPlayerListener(PlayerListener pl) {
-		listener = pl;
+	public void addPlayerListener(PlayerListener pl) {
+		_listeners.add(pl);
+	}
+	
+	public void removePlayerListener(PlayerListener pl){
+		_listeners.remove(pl);
 	}
 }
