@@ -14,13 +14,13 @@ public class PlayerEvent extends EventObject {
 	}
 	
 	public PlayerEvent(String m){
-		super(null);
+		super(m);
 		mess = m;
 		id = -1;
 	}
 	
 	public PlayerEvent(String m, int idx){
-		super(null);
+		super(m);
 		mess = m;
 		this.id = idx;
 	}

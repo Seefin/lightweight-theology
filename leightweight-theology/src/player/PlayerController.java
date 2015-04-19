@@ -62,11 +62,14 @@ ActionListener, ListSelectionListener, PlayerListener {
 	}
 
 	public void valueChanged(ListSelectionEvent e) {
-		int selectedSong = e.getLastIndex() + 1;
+		int selectedSong = e.getLastIndex();
 		System.out.println("Hello! Row: " + selectedSong);
 		try {
 			model.stopFile();
 			String name = model.getPlaylistItem(selectedSong);
+			if(name == null){
+				return;
+			}
 			model.setFilename(new File(name));
 			model.playFile();
 		} catch (IOException | UnsupportedAudioFileException
