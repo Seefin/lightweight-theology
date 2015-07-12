@@ -21,11 +21,10 @@ ActionListener, ListSelectionListener, PlayerListener {
 	PlayerView view;
 	PlayerModel model;
 
-	/**
-	 * Construct a new controller instance. As the controller constructs the
-	 * model and view instances, this effectivly starts the program; we make
-	 * this file the listener for the various buttons, then hand control off to
-	 * the user.
+	/**Construct a new controller instance. 
+	 * As the controller constructs the model and view instances, this 
+	 * effectively starts the program; we make this file the listener 
+	 * for the various buttons, then hand control off to the user.
 	 */
 	public PlayerController() {
 		model = new PlayerModel("test.wav");
@@ -37,7 +36,12 @@ ActionListener, ListSelectionListener, PlayerListener {
 		view.setPlaylistDataModel(this);
 		view.addPlaylistListener(this);
 		
-		model.addPlayerListener(this);
+		if (model == null){
+			System.out.println("Error: Model is null when it should most definitly not be.");
+			System.exit(1);
+		} else {
+			model.addPlayerListener(this);
+		}
 	}
 
 	// -----Listeners ----
@@ -57,7 +61,6 @@ ActionListener, ListSelectionListener, PlayerListener {
 					| LineUnavailableException e1) {
 				e1.printStackTrace();
 			} //Should be pointless
-
 		}
 	}
 
@@ -76,7 +79,6 @@ ActionListener, ListSelectionListener, PlayerListener {
 				| LineUnavailableException e1) {
 			e1.printStackTrace();
 		}
-
 	}
 
 	/**

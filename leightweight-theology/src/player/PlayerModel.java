@@ -28,7 +28,6 @@ public class PlayerModel {
 	private Playlist playlist;
 	private ArrayList<PlayerListener> _listeners;
 
-	// Calculation
 	/**
 	 * Creates a new Model. The created model has all of the audio system set up
 	 * and ready to go, and just needs to be supplied with an audio file so it
@@ -38,6 +37,7 @@ public class PlayerModel {
 	 *            The filename of the audio file to play.
 	 */
 	public PlayerModel(String filename) {
+		_listeners = new ArrayList<>();
 		try {
 			audioFile = new File(filename);
 			setupAudioSystem();
@@ -47,9 +47,10 @@ public class PlayerModel {
 	}
 
 	/**
-	 * Play the selected file. Plays the selected file. It does this by wrapping
-	 * all the 'play stream' logic in an anonymous instance of Runnable, and
-	 * uses java's concurrency libraries to get it running.
+	 * Play the selected file.
+	 * It does this by wrapping all the 'play stream' logic in an anonymous 
+	 * instance of Runnable, and uses java's concurrency libraries to 
+	 * get it running.
 	 *
 	 * As the stop boolean is volatile, it will be monitored even in a multiple
 	 * core environment.
@@ -128,8 +129,8 @@ public class PlayerModel {
 	}
 
 	/**
-	 * Set the file to a new thing. Allows dynamic changing of the file to be
-	 * played by the user.
+	 * Set the filename to a new File object. Allows dynamic changing of the 
+	 * file to be played by the user.
 	 *
 	 * @param args
 	 *            File to change it to.
