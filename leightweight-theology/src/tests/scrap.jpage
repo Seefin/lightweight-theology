@@ -1,0 +1,3 @@
+Path p = Paths.get("/var/lib/mpd/.playlist/musicList.m3u");
+String file = p.getFileName().toString();
+char[] charArray = file.toCharArray();int mark = charArray.length - 1;for(int i = mark; i > 0; i--){	if(charArray[i] == '.'){		mark = i;	}}StringBuffer str = new StringBuffer();for(int i = 0; i < mark; i++){	str.append(charArray[i]);}return str.toString();

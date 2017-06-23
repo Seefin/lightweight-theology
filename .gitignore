@@ -1,0 +1,4 @@
+bin/*
+*.class
+*.wav
+*.mp3
