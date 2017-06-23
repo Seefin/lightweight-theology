@@ -45,7 +45,7 @@ public class InetStreamer implements Streamer {
 			} catch (Exception e) {
 				System.out.println("Something Happened!");
 				System.out.println(e.getMessage());
-				System.out.println(e.getStackTrace());
+				e.printStackTrace();
 				System.exit(1);
 			}
 		}
@@ -69,11 +69,12 @@ public class InetStreamer implements Streamer {
 		Reader fr = new InputStreamReader(fis);
 		
 		List<String> line = core.util.CSVParser.parseLine(fr);
+		int i = 0;
 		while(line != null){
-			assert(line.get(1) != null);
-			assert(line.get(2) != null);
-			name = line.get(1);
-			songFile = new File(line.get(2));
+			i++;
+			System.out.println("Pass "+i);
+			name = line.get(0);
+			songFile = new File(line.get(1));
 			
 			songs.put(name, songFile);
 			
